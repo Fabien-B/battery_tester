@@ -1,0 +1,3 @@
+[submodule "kicad_libs_GRZ"]
+	path = kicad_libs_GRZ
+	url = https://github.com/Fabien-B/kicad_libs_GRZ

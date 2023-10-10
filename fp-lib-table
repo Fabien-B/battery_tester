@@ -22,4 +22,5 @@
   (lib (name "_Universal_GRZ")(type "KiCad")(uri "${KIPRJMOD}/kicad_libs_GRZ/Footprints/_Universal_GRZ.pretty")(options "")(descr ""))
   (lib (name "_Wire_Pads_GRZ")(type "KiCad")(uri "${KIPRJMOD}/kicad_libs_GRZ/Footprints/_Wire_Pads_GRZ.pretty")(options "")(descr ""))
   (lib (name "_Z_Brouillon_GRZ")(type "KiCad")(uri "${KIPRJMOD}/kicad_libs_GRZ/Footprints/_Z_Brouillon_GRZ.pretty")(options "")(descr ""))
+  (lib (name "myFootprints")(type "KiCad")(uri "${KIPRJMOD}/kicad_libs_FBO/myFootprints.pretty")(options "")(descr ""))
 )

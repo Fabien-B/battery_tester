@@ -16,4 +16,5 @@
   (lib (name "_GRZ_Sensors")(type "KiCad")(uri "${KIPRJMOD}/kicad_libs_GRZ/Symbols/_GRZ_Sensors.kicad_sym")(options "")(descr ""))
   (lib (name "_GRZ_Switches")(type "KiCad")(uri "${KIPRJMOD}/kicad_libs_GRZ/Symbols/_GRZ_Switches.kicad_sym")(options "")(descr ""))
   (lib (name "_GRZ_Transistors")(type "KiCad")(uri "${KIPRJMOD}/kicad_libs_GRZ/Symbols/_GRZ_Transistors.kicad_sym")(options "")(descr ""))
+  (lib (name "mySymbols")(type "KiCad")(uri "${KIPRJMOD}/kicad_libs_FBO/mySymbols.kicad_sym")(options "")(descr ""))
 )

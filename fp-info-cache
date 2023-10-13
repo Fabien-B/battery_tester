@@ -1,4 +1,4 @@
-22700852512132016
+22702686853766548
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -93888,8 +93888,8 @@ NFC_antenna
 
 
 0
-0
-0
+8
+4
 myFootprints
 NUCLEO32
 
@@ -93919,7 +93919,14 @@ PTN78000
 5
 5
 myFootprints
-Power_pads
+Power_pads_01x02_5.08x2.54
+
+
+0
+2
+2
+myFootprints
+Power_pads_01x02_10.16x5.08
 
 
 0

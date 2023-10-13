@@ -5,6 +5,13 @@
   )
 
   (paper "A4")
+  (title_block
+    (title "Battery tester")
+    (date "2023-10-13")
+    (rev "V1")
+    (comment 4 "AISLER Project ID: SZLZXKNH")
+  )
+
   (layers
     (0 "F.Cu" signal)
     (31 "B.Cu" signal)
@@ -38,6 +45,19 @@
   )
 
   (setup
+    (stackup
+      (layer "F.SilkS" (type "Top Silk Screen"))
+      (layer "F.Paste" (type "Top Solder Paste"))
+      (layer "F.Mask" (type "Top Solder Mask") (thickness 0.01))
+      (layer "F.Cu" (type "copper") (thickness 0.035))
+      (layer "dielectric 1" (type "core") (thickness 1.51) (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+      (layer "B.Cu" (type "copper") (thickness 0.035))
+      (layer "B.Mask" (type "Bottom Solder Mask") (thickness 0.01))
+      (layer "B.Paste" (type "Bottom Solder Paste"))
+      (layer "B.SilkS" (type "Bottom Silk Screen"))
+      (copper_finish "None")
+      (dielectric_constraints no)
+    )
     (pad_to_mask_clearance 0)
     (pcbplotparams
       (layerselection 0x00010fc_ffffffff)
@@ -6145,7 +6165,7 @@
       (stroke (width 0.1) (type solid)) (layer "B.Fab") (tstamp 55cdba0c-628d-412f-907e-5fdaf853ce68))
     (fp_line (start 17.45 2.3) (end 16.25 2.3)
       (stroke (width 0.1) (type solid)) (layer "B.Fab") (tstamp c638d0c5-07f9-4008-8514-734b093d16cd))
-    (pad "1" thru_hole roundrect (at 0 0 90) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.147059)
+    (pad "1" thru_hole roundrect (at 0 0 90) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask") (roundrect_rratio 0.1470588235)
       (net 1 "GND") (pinfunction "Pin_1") (pintype "passive") (tstamp 4b962c18-3f1f-46ce-8d82-0acfa9115053))
     (pad "2" thru_hole oval (at 2.5 0 90) (size 1.7 1.95) (drill 0.95) (layers "*.Cu" "*.Mask")
       (net 27 "Net-(J1-Pin_2)") (pinfunction "Pin_2") (pintype "passive") (tstamp 8c33bd5a-43f0-42f8-8cbc-5895e3cb7011))

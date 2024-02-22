@@ -10,6 +10,7 @@
 #include "usb_serial.h"
 //#include "rtcAccess.h"
 #include "printf.h"
+#include "voltage_monitor.h"
 
 
 /*===========================================================================*/
@@ -47,16 +48,19 @@ static void cmd_help(BaseSequentialStream *lchp, int argc,const char * const arg
   chprintf (lchp, "  threads: info about threads\r\n");
   chprintf (lchp, "  uid: get chip unique ID\r\n");
   chprintf (lchp, "  help: get help\r\n");
+  chprintf (lchp, "  volt: get cell voltages\r\n");
 }
 
 static void cmd_volt(BaseSequentialStream *lchp, int argc,const char * const argv[]) {
   (void)argv;
   (void)argc;
+  std::array<float, 6> voltages;
+  get_cell_voltages(voltages);
   chprintf (lchp, "voltages:\r\n");
-  // chprintf (lchp, "  mem:\r\n");
-  // chprintf (lchp, "  threads: info about threads\r\n");
-  // chprintf (lchp, "  uid: get chip unique ID\r\n");
-  // chprintf (lchp, "  help: get help\r\n");
+  chprintf (lchp, "%02f  %02f  %02f  %02f  %02f  %02f\r\n",
+    voltages[0], voltages[1], voltages[2],
+    voltages[3], voltages[4], voltages[5]
+  );
 }
 
 /*===========================================================================*/

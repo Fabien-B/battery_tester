@@ -124,11 +124,12 @@ LDSCRIPT= $(STARTUPLD)/STM32G474xE.ld
 # setting.
 CSRC = $(ALLCSRC) \
        $(TESTSRC) \
-      $(VARIOUS)/stdutil.c \
-       $(VARIOUS)/printf.c \
-       src/main.c \
-       src/usbcfg.c \
-       src/voltage_monitor.c
+       $(CHIBIOS)/os/various/syscalls.c \
+       $(VARIOUS)/stdutil.c \
+       $(VARIOUS)/usb_serial.c \
+       $(VARIOUS)/microrl/microrl.c \
+       $(VARIOUS)/microrl/microrlShell.c \
+       $(VARIOUS)/printf.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
 # setting.

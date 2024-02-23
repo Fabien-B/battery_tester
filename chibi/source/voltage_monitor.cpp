@@ -8,7 +8,7 @@
 
 void adcerrorcallback(ADCDriver *adcp, adcerror_t err);
 
-const ADCConfig portab_adccfg1 = {
+const ADCConfig adccfg1 = {
   .difsel       = 0U
 };
 
@@ -21,6 +21,7 @@ const ADCConfig portab_adccfg1 = {
 #define VC4_CHANNEL   ADC_CHANNEL_IN1
 #define VC5_CHANNEL   ADC_CHANNEL_IN2
 #define VC6_CHANNEL   ADC_CHANNEL_IN3
+
 
 // voltage divider factors
 float VFACTORS[6] = {1.32, 2.77, 4.28, 5.65, 6.59, 7.76};
@@ -96,7 +97,7 @@ static THD_FUNCTION(ThreadADC, arg) {
   (void)arg;
   chRegSetThreadName("ADC reading");
 
-  adcStart(&ADCD1, &portab_adccfg1);
+  adcStart(&ADCD1, &adccfg1);
 
   while (true) {
     /* Performing a one-shot conversion*/
@@ -115,6 +116,8 @@ static THD_FUNCTION(ThreadADC, arg) {
       for(int i=5; i>0; i--) {
         if(voltages[i] > 0.1) {
           cell_voltages[i] = voltages[i] - voltages[i-1];
+        } else {
+          cell_voltages[i] = voltages[i];
         }
       }
       cell_voltages[0] = voltages[0];

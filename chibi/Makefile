@@ -129,6 +129,7 @@ CSRC = $(ALLCSRC) \
        $(VARIOUS)/usb_serial.c \
        $(VARIOUS)/microrl/microrl.c \
        $(VARIOUS)/microrl/microrlShell.c \
+       $(VARIOUS)/ssd1306.c \
        $(VARIOUS)/printf.c
 
 # C++ sources that can be compiled in ARM or THUMB mode depending on the global
@@ -142,7 +143,7 @@ ASMSRC = $(ALLASMSRC)
 ASMXSRC = $(ALLXASMSRC)
 
 # Inclusion directories.
-INCDIR = $(CONFDIR) $(ALLINC) $(TESTINC) src $(VARIOUS)
+INCDIR = $(CONFDIR) $(ALLINC) $(TESTINC) src $(VARIOUS) $(VARIOUS)/GFXfonts/
 
 # Define C warning options here.
 CWARN = -Wall -Wextra -Wundef -Wstrict-prototypes -Wcast-align=strict

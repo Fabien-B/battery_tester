@@ -6,6 +6,9 @@
 #include "printf.h"
 #include "stdutil.h"
 #include "ttyConsole.h"
+#include "temp_sensor.h"
+#include "ui.h"
+#include "power_switch.h"
 
 /*
  * Green LED blinker thread, times are in milliseconds.
@@ -34,6 +37,17 @@ SerialConfig sd1conf = {
   .cr3 = 0
 };
 
+I2CConfig i2cconf = {
+  .timingr =
+    STM32_TIMINGR_PRESC(0U)   |
+    STM32_TIMINGR_SCLDEL(14U) |
+    STM32_TIMINGR_SDADEL(0U)  |
+    STM32_TIMINGR_SCLH(87U)   |
+    STM32_TIMINGR_SCLL(253U),
+  .cr1 = 0,
+  .cr2 = 0
+};
+
 /*
  * Application entry point.
  */
@@ -44,21 +58,7 @@ int main(void) {
 
 //  palSetLine(LINE_POWER_KEY);
   sdStart(&SD1, &sd1conf);
-
-
-  // sduObjectInit(&PORTAB_SDU1);
-  // sduStart(&PORTAB_SDU1, &serusbcfg);
-
-  /*
-   * Activates the USB driver and then the USB bus pull-up on D+.
-   * Note, a delay is inserted in order to not have to disconnect the cable
-   * after a reset.
-   */
-  // usbDisconnectBus(serusbcfg.usbp);
-  // chThdSleepMilliseconds(1500);
-  // usbStart(serusbcfg.usbp, &usbcfg);
-  // usbConnectBus(serusbcfg.usbp);
-
+  i2cStart(&I2CD2, &i2cconf);
 
   consoleInit();
 
@@ -69,6 +69,9 @@ int main(void) {
   chThdCreateStatic(waThread1, sizeof(waThread1), NORMALPRIO, Thread1, NULL);
 
   start_adc_thread();
+  start_temp_monitor();
+  start_ui();
+  start_power_switch();
   
   
   consoleLaunch();  // launch shell. Never returns.

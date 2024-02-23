@@ -14,7 +14,7 @@
             "servertype": "bmp",
             "BMPGDBSerialPort": "/dev/bmp-gdb",
             "svdPath": "STM32G484.svd",
-            "preLaunchCommands": ["make"]
+            "preLaunchTask": "Build $(gear)"
         }
     ]
 }

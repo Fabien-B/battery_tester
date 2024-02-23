@@ -1,19 +1,19 @@
 {
     "env": {
         "CHIBISTUDIO": "${env:HOME}/dev/CHIBIOS",
-        "CHIBIOS": "${CHIBISTUDIO}/ChibiOS"
+        "CHIBIOS": "${CHIBISTUDIO}/ChibiOS",
+        "VARIOUS": "${workspaceFolder}/various"
     },
     "configurations": [
         {
             "name": "Linux",
             "includePath": [
-                "/opt/gcc-arm-none-eabi-10.3-2021.10/**",
+                "/opt/gcc-arm-none-eabi-13.2/**",
                 "${workspaceFolder}/cfg",
                 "${workspaceFolder}/various",
                 "${CHIBIOS}/os/hal/ports/STM32/STM32G4xx/**",
                 "${CHIBIOS}/os/rt/include/**",
                 "${CHIBIOS}/os/license",
-
                 "${CHIBIOS}/os/common/portability/GCC",
                 "${CHIBIOS}/os/common/startup/ARMCMx/compilers/GCC",
                 "${CHIBIOS}/os/common/startup/ARMCMx/devices/STM32G4xx",
@@ -47,10 +47,11 @@
                 "${CHIBIOS}/os/common/ports/ARMv7-M",
                 "${CHIBIOS}/test/rt/source/test",
                 "${CHIBIOS}/os/test/include",
-                "${CHIBIOS}/test/oslib/source/test"
+                "${CHIBIOS}/test/oslib/source/test",
+                "${VARIOUS}/GFXfonts"
             ],
             "defines": [],
-            "compilerPath": "/opt/gcc-arm-none-eabi-10.3-2021.10/bin/arm-none-eabi-gcc",
+            "compilerPath": "/opt/gcc-arm-none-eabi-13.2/bin/arm-none-eabi-gcc",
             "cStandard": "c17",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64",

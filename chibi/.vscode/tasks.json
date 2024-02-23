@@ -6,7 +6,7 @@
         {
             "label": "Build $(gear)",
             "type": "shell",
-            "command": "make",
+            "command": "make -j8",
             "problemMatcher": [
                 "$gcc"
             ],

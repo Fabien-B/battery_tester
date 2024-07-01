@@ -1,9 +1,13 @@
 #include "power_switch.h"
 #include "hal.h"
 #include "ch.h"
+#include "math.h"
 
 #define BTS1_CHANNEL 1
 #define BTS2_CHANNEL 3
+
+// factor due to the voltage divider 5V->3.3V (10k, 18k)
+#define ACS713_VFACTOR 1.55
 
 constexpr uint32_t PWM_FREQ = 10000;
 constexpr pwmcnt_t PWM_PERIOD = 200;
@@ -13,13 +17,15 @@ float throttle1 = 0;
 
 
 #define ADC_GRP2_NUM_CHANNELS   3
-#define ADC_GRP2_BUF_DEPTH      1
+#define ADC_GRP2_BUF_DEPTH      2
 #define BTS1_SENSE_CHANNEL  ADC_CHANNEL_IN3
 #define BTS2_SENSE_CHANNEL  ADC_CHANNEL_IN11
 #define VACS_CHANNEL        ADC_CHANNEL_IN13
 
 
 adcsample_t samples2[CACHE_SIZE_ALIGN(adcsample_t, ADC_GRP2_NUM_CHANNELS * ADC_GRP2_BUF_DEPTH)];
+
+float v_ac_bias = 0;
 
 static PWMConfig pwm3cfg = {
   .frequency = PWM_FREQ,
@@ -43,14 +49,12 @@ static PWMConfig pwm3cfg = {
       .callback = NULL
     },
   },
-  //.cr2 = TIM_CR2_MMS_1,                 // Update event
   .cr2 = TIM_CR2_MMS_2,                   // tim_oc2refc
-  //.cr2 = TIM_CR2_MMS_2 |TIM_CR2_MMS_1 | TIM_CR2_MMS_0, // tim_oc4refc
   .bdtr = 0,
   .dier = 0
 };
 
-float current0, current1, current2;
+float current_bts1, current_bts2, current_acs713;
 
 void adcendcb(ADCDriver*);
 
@@ -64,7 +68,7 @@ const ADCConversionGroup adcgrpcfg2 = {
   .num_channels = ADC_GRP2_NUM_CHANNELS,
   .end_cb       = adcendcb,
   .error_cb     = NULL,
-  .cfgr         = ADC_CFGR_EXTEN_1 | ADC_CFGR_EXTSEL_2,
+  .cfgr         = ADC_CFGR_EXTEN_1 | ADC_CFGR_EXTSEL_2 | ADC_CFGR_CONT,
   .cfgr2        = 0U,
   .tr1          = ADC_TR_DISABLED,
   .tr2          = ADC_TR_DISABLED,
@@ -93,17 +97,36 @@ const ADCConfig adccfg2 = {
 
 void adcendcb(ADCDriver*) {
   palToggleLine(LINE_LED_RUN);
-  current0 = 0;
-  current1 = 0;
-  current2 = 0;
+
+  float v_bts1 = 0;
+  float v_bts2 = 0;
+  float v_ac = 0;
   for(int i=0; i<ADC_GRP2_BUF_DEPTH; i++) {
-    current0 += samples2[0 + i*ADC_GRP2_NUM_CHANNELS] / static_cast<float>(ADC_GRP2_BUF_DEPTH);
-    current1 += samples2[1 + i*ADC_GRP2_NUM_CHANNELS] / static_cast<float>(ADC_GRP2_BUF_DEPTH);
-    current2 += samples2[2 + i*ADC_GRP2_NUM_CHANNELS] / static_cast<float>(ADC_GRP2_BUF_DEPTH);
+    v_bts1 += samples2[0 + i*ADC_GRP2_NUM_CHANNELS] / static_cast<float>(ADC_GRP2_BUF_DEPTH);
+    v_bts2 += samples2[1 + i*ADC_GRP2_NUM_CHANNELS] / static_cast<float>(ADC_GRP2_BUF_DEPTH);
+    v_ac   += samples2[2 + i*ADC_GRP2_NUM_CHANNELS] / static_cast<float>(ADC_GRP2_BUF_DEPTH);
   }
-  current0 *= throttle0 /100.0;
-  current1 *= throttle1 /100.0;
-  current2 *= (throttle0 + throttle1) / 100.0;
+  // current mesured on BTS1
+  v_bts1 *= 3.3 / (powf(2, 12)-1);// * throttle0 /100.0;
+  // current mesured on BTS2
+  v_bts2 *= 3.3 / (powf(2, 12)-1);// * throttle1 /100.0;
+  // total current
+  // hypothesis: the resistors are exactly the same on BTS1 and BTS2
+  v_ac   *= 3.3 / (powf(2, 12)-1) * ACS713_VFACTOR;// * (throttle0 + throttle1) / 100.0;
+
+  if(v_ac_bias == 0) {
+    v_ac_bias = v_ac;
+  }
+  v_ac_bias = v_ac_bias*0.95 + v_ac*0.05;
+  v_ac_bias = 0;
+
+  // TODO convert voltage to current.
+
+  float iis_bts1 = v_bts1 / 1200.0;
+  float iis_bts2 = v_bts2 / 1200.0;
+  current_bts1 = iis_bts1 * 20000.0;
+  current_bts2 = iis_bts2 * 20000.0;
+  current_acs713 = (v_ac - v_ac_bias)   * 1000.0;
 }
 
 
@@ -157,6 +180,9 @@ static THD_FUNCTION(ThreadPowerSwitch, arg) {
     pwmEnableChannel(&PWMD3, BTS1_CHANNEL, throttle0*PWM_PERIOD/100.0);
     if(throttle0 != 0) {
       pwmEnableChannel(&PWMD3, 0, throttle0*0.5*PWM_PERIOD/100.0);
+    }else {
+      // measure current if fully off
+      pwmEnableChannel(&PWMD3, 0, 1.0*PWM_PERIOD/100.0);
     }
     chThdSleepMilliseconds(10);
   }
@@ -165,21 +191,20 @@ static THD_FUNCTION(ThreadPowerSwitch, arg) {
 
 
 
-float get_current(int index) {
-  switch (index)
+float get_current(enum CurrentSensor sensor) {
+  switch (sensor)
   {
-  case 0:
-    return current0;
+  case CS_BTS1:
+    return current_bts1;
     break;
-  case 1:
-    return current1;
+  case CS_BTS2:
+    return current_bts2;
     break;
-  case 2:
-    return current2;
+  case CS_ACS713:
+    return current_acs713;
     break;
   default:
     return -1;
-    break;
   }
 }
 

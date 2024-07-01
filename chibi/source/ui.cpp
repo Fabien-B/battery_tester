@@ -89,13 +89,13 @@ static THD_FUNCTION(ThreadUi, arg) {
     if(ret == MSG_OK) {
       // TODO priority order
       if(buttons & BP_NEXT) {
-        pwr_switch0_thr += 10;
+        pwr_switch0_thr = std::min(pwr_switch0_thr + 10, 100.f);
       }
       else if(buttons & BP_PREV) {
-        pwr_switch0_thr -= 10;
+        pwr_switch0_thr = std::max(pwr_switch0_thr - 10, 0.f);
       }
       else if(buttons & BP_OK) {
-
+        pwr_switch0_thr = 100;
       }
       else if(buttons & BP_RET) {
         pwr_switch0_thr = 0;
@@ -107,9 +107,9 @@ static THD_FUNCTION(ThreadUi, arg) {
     float temp = get_temperature();
     
     
-    float current0 = get_current(0);
-    float current1 = get_current(1);
-    float current2 = get_current(2);
+    float current0 = get_current(CS_BTS1);
+    float current1 = get_current(CS_BTS2);
+    float current2 = get_current(CS_ACS713);
 
     set_power_switch_throttle(0, pwr_switch0_thr);
     set_power_switch_throttle(1, pwr_switch1_thr);

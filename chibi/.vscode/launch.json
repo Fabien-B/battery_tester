@@ -5,10 +5,22 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Cortex Debug",
+            "name": "launch",
             "cwd": "${workspaceFolder}",
             "executable": "./build/ch.elf",
             "request": "launch",
+            "type": "cortex-debug",
+            "runToEntryPoint": "main",
+            "servertype": "bmp",
+            "BMPGDBSerialPort": "/dev/bmp-gdb",
+            "svdPath": "STM32G484.svd",
+            "preLaunchTask": "Build $(gear)"
+        },
+        {
+            "name": "attach",
+            "cwd": "${workspaceFolder}",
+            "executable": "./build/ch.elf",
+            "request": "attach",
             "type": "cortex-debug",
             "runToEntryPoint": "main",
             "servertype": "bmp",

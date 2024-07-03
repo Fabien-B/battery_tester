@@ -9,6 +9,7 @@
 #include "temp_sensor.h"
 #include "ui.h"
 #include "power_switch.h"
+#include "reporting.h"
 
 /*
  * Green LED blinker thread, times are in milliseconds.
@@ -72,6 +73,7 @@ int main(void) {
   start_temp_monitor();
   start_ui();
   start_power_switch();
+  start_reporting();
   
   
   consoleLaunch();  // launch shell. Never returns.

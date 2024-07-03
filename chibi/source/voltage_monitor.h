@@ -6,3 +6,5 @@
 void start_adc_thread(void);
 
 void get_cell_voltages(std::array<float, 6>& voltages);
+
+float get_total_voltage();

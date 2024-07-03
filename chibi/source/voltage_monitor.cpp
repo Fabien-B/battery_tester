@@ -28,6 +28,7 @@ float VFACTORS[6] = {1.32, 2.77, 4.28, 5.65, 6.59, 7.76};
 
 // cell voltages
 float cell_voltages[6];
+float max_voltage;
 
 /*
  * ADC conversion group 1.
@@ -113,9 +114,11 @@ static THD_FUNCTION(ThreadADC, arg) {
 
       // protect global variable
       chSysLock();
+      max_voltage = 0;
       for(int i=5; i>0; i--) {
         if(voltages[i] > 0.1) {
           cell_voltages[i] = voltages[i] - voltages[i-1];
+          max_voltage = MAX(max_voltage, voltages[i]);
         } else {
           cell_voltages[i] = voltages[i];
         }
@@ -135,6 +138,10 @@ void get_cell_voltages(std::array<float, 6>& voltages) {
     voltages[i] = cell_voltages[i];
   }
   chSysUnlock();
+}
+
+float get_total_voltage() {
+  return max_voltage;
 }
 
 void start_adc_thread() {

@@ -103,7 +103,7 @@
 
 #define	PD00                           0U
 #define	PD01                           1U
-#define	PD02                           2U
+#define	PD02_SD_CS                     2U
 #define	PD03                           3U
 #define	PD04                           4U
 #define	PD05                           5U
@@ -214,6 +214,8 @@
 #define	LINE_LED_HB                    PAL_LINE(GPIOC, 11U)
 #define	LINE_SD_DETECT                 PAL_LINE(GPIOC, 12U)
 #define	LINE_OSC32_IN                  PAL_LINE(GPIOC, 14U)
+
+#define	LINE_SD_CS                     PAL_LINE(GPIOD, 2U)
 
 #define	LINE_OSC_IN                    PAL_LINE(GPIOF, 0U)
 
@@ -509,7 +511,7 @@
 					 PIN_PUPDR_PULLUP(PC09_BP_OK) | \
 					 PIN_PUPDR_FLOATING(PC10_LED_RUN) | \
 					 PIN_PUPDR_FLOATING(PC11_LED_HB) | \
-					 PIN_PUPDR_FLOATING(PC12_SD_DETECT) | \
+					 PIN_PUPDR_PULLUP(PC12_SD_DETECT) | \
 					 PIN_PUPDR_PULLDOWN(PC13) | \
 					 PIN_PUPDR_FLOATING(PC14_OSC32_IN) | \
 					 PIN_PUPDR_PULLDOWN(PC15))
@@ -551,7 +553,7 @@
 
 #define VAL_GPIOD_MODER                 (PIN_MODE_INPUT(PD00) | \
 					 PIN_MODE_INPUT(PD01) | \
-					 PIN_MODE_INPUT(PD02) | \
+					 PIN_MODE_OUTPUT(PD02_SD_CS) | \
 					 PIN_MODE_INPUT(PD03) | \
 					 PIN_MODE_INPUT(PD04) | \
 					 PIN_MODE_INPUT(PD05) | \
@@ -568,7 +570,7 @@
 
 #define VAL_GPIOD_OTYPER                (PIN_OTYPE_PUSHPULL(PD00) | \
 					 PIN_OTYPE_PUSHPULL(PD01) | \
-					 PIN_OTYPE_PUSHPULL(PD02) | \
+					 PIN_OTYPE_PUSHPULL(PD02_SD_CS) | \
 					 PIN_OTYPE_PUSHPULL(PD03) | \
 					 PIN_OTYPE_PUSHPULL(PD04) | \
 					 PIN_OTYPE_PUSHPULL(PD05) | \
@@ -585,7 +587,7 @@
 
 #define VAL_GPIOD_OSPEEDR               (PIN_OSPEED_SPEED_VERYLOW(PD00) | \
 					 PIN_OSPEED_SPEED_VERYLOW(PD01) | \
-					 PIN_OSPEED_SPEED_VERYLOW(PD02) | \
+					 PIN_OSPEED_SPEED_VERYLOW(PD02_SD_CS) | \
 					 PIN_OSPEED_SPEED_VERYLOW(PD03) | \
 					 PIN_OSPEED_SPEED_VERYLOW(PD04) | \
 					 PIN_OSPEED_SPEED_VERYLOW(PD05) | \
@@ -602,7 +604,7 @@
 
 #define VAL_GPIOD_PUPDR                 (PIN_PUPDR_PULLDOWN(PD00) | \
 					 PIN_PUPDR_PULLDOWN(PD01) | \
-					 PIN_PUPDR_PULLDOWN(PD02) | \
+					 PIN_PUPDR_FLOATING(PD02_SD_CS) | \
 					 PIN_PUPDR_PULLDOWN(PD03) | \
 					 PIN_PUPDR_PULLDOWN(PD04) | \
 					 PIN_PUPDR_PULLDOWN(PD05) | \
@@ -619,7 +621,7 @@
 
 #define VAL_GPIOD_ODR                   (PIN_ODR_LEVEL_LOW(PD00) | \
 					 PIN_ODR_LEVEL_LOW(PD01) | \
-					 PIN_ODR_LEVEL_LOW(PD02) | \
+					 PIN_ODR_LEVEL_HIGH(PD02_SD_CS) | \
 					 PIN_ODR_LEVEL_LOW(PD03) | \
 					 PIN_ODR_LEVEL_LOW(PD04) | \
 					 PIN_ODR_LEVEL_LOW(PD05) | \
@@ -636,7 +638,7 @@
 
 #define VAL_GPIOD_AFRL			(PIN_AFIO_AF(PD00, 0) | \
 					 PIN_AFIO_AF(PD01, 0) | \
-					 PIN_AFIO_AF(PD02, 0) | \
+					 PIN_AFIO_AF(PD02_SD_CS, 0) | \
 					 PIN_AFIO_AF(PD03, 0) | \
 					 PIN_AFIO_AF(PD04, 0) | \
 					 PIN_AFIO_AF(PD05, 0) | \

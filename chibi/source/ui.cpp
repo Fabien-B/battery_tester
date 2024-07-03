@@ -6,6 +6,7 @@
 #include "voltage_monitor.h"
 #include "temp_sensor.h"
 #include "power_switch.h"
+#include "reporting.h"
 
 
 constexpr uint32_t BP_OK = 1;
@@ -25,6 +26,15 @@ static const GPTConfig gpt4cfg = {
   callback:     gpt3cb,
   cr2:          0U,
   dier:         0U
+};
+
+SSD1306Pixel SD_ICON[] = {
+  {110, 63},
+  {110, 50},
+  {103, 50},
+  {100, 53},
+  {100, 63},
+  {110, 63},
 };
 
 void button_cb(void*) {
@@ -128,6 +138,14 @@ static THD_FUNCTION(ThreadUi, arg) {
 
     ssd1306_MoveCursor(0, 50);
     ssd1306_WriteFmt(Font5x7FixedMono, WHITE, "%01f  %01f  %01f", current0, current1, current2);
+
+    ssd1306_MoveCursor(10, 60);
+
+    if(is_sd_card_ready()) {
+      ssd1306_DrawPolyline(SD_ICON, sizeof(SD_ICON)/sizeof(SSD1306Pixel), WHITE);
+    } else {
+
+    }
 
     //ssd1306_WriteChar('a', Lato_Heavy_12, WHITE);
     //ssd1306_DrawCircle(20 + c%88, 20, 5, WHITE);

@@ -243,7 +243,8 @@ bool mmc_lld_is_card_inserted(MMCDriver *mmcp) {
 
   (void)mmcp;
   /* CHTODO: Fill the implementation.*/
-  return true;
+  return !palReadLine(LINE_SD_DETECT);
+  //return true;
 }
 
 /**

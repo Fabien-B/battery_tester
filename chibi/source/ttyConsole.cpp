@@ -11,6 +11,7 @@
 //#include "rtcAccess.h"
 #include "printf.h"
 #include "voltage_monitor.h"
+#include "reporting.h"
 
 
 /*===========================================================================*/
@@ -34,6 +35,7 @@ static const ShellCommand commands[] = {
   {"uid", cmd_uid},
   {"help", cmd_help},
   {"volt", cmd_volt},
+  {"tree", cmd_tree},
   {NULL, NULL}
 };
 

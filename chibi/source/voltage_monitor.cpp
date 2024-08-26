@@ -144,6 +144,15 @@ float get_total_voltage() {
   return max_voltage;
 }
 
+int get_cells_number() {
+  for(int i=0; i<6; i++) {
+    if(cell_voltages[i] < 1) {
+      return i;
+    }
+  }
+  return 6;
+}
+
 void start_adc_thread() {
   chThdCreateStatic(waThreadADC, sizeof(waThreadADC), NORMALPRIO, ThreadADC, NULL);
 }

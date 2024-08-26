@@ -8,13 +8,14 @@
 #include "stdutil.h"
 #include "ff.h"
 #include "string.h"
-
+#include "ch.h"
 
 
 static const char LOG_DIR[] = "BATTERY_TESTER";
 static const char prefix[] = "bt";
 FIL log_fd;
 bool log_opened = false;
+float log_energy = 0;
 
 FRESULT setup_file(FIL* log_file);
 
@@ -35,6 +36,16 @@ static unsigned cnt;
 
 // Card event sources.
 static event_source_t inserted_event, removed_event;
+
+static event_source_t new_log_event, close_log_event;
+void new_log() {
+  chEvtBroadcast(&new_log_event);
+}
+
+void close_log() {
+  chEvtBroadcast(&close_log_event);
+}
+
 
 /**
  * @brief   Insertion monitor timer callback function.
@@ -205,25 +216,44 @@ static void InsertHandler(eventid_t id) {
   }
   fs_ready = TRUE;
   
-  if(setup_file(&log_fd) == FR_OK) {
-    log_opened = true;
-    palSetLine(LINE_LED_HB);
-      const char log_header[] = "U,du,u1,u2,u3,u4,u5,u6,ctot,c1,c2,cacs\r\n";
-      UINT nbw;
-      f_write(&log_fd, log_header, sizeof(log_header), &nbw);
-  }
+
 }
 
 UINT log_write(const char* buffer, size_t len) {
   if(log_opened) {
     UINT nbw;
-    FRESULT res = f_write(&log_fd, buffer, len, &nbw);
-    res = f_sync(&log_fd);
+//    FRESULT res = 
+    f_write(&log_fd, buffer, len, &nbw);
+    //res = f_sync(&log_fd);
     return nbw;
   } else {
     return 0;
   }
 }
+
+void closeLogHandler(eventid_t id) {
+  (void)id;
+  if(log_opened) {
+    f_close(&log_fd);
+    log_opened = false;
+  }
+}
+
+void newLogHandler(eventid_t id) {
+  (void)id;
+  if(log_opened) {
+    return;
+  }
+
+  if(setup_file(&log_fd) == FR_OK) {
+    log_energy = 0;
+    log_opened = true;
+    palSetLine(LINE_LED_HB);
+    const char log_header[] = "E(mAh),U,du,u1,u2,u3,u4,u5,u6,ctot,c1,c2,cacs\r\n";
+    log_write(log_header, sizeof(log_header));
+  }
+}
+
 
 // Card removal event.
 static void RemoveHandler(eventid_t id) {
@@ -236,6 +266,10 @@ static void RemoveHandler(eventid_t id) {
 
 bool is_sd_card_ready() {
   return fs_ready;
+}
+
+bool is_log_opened() {
+  return log_opened;
 }
 
 
@@ -265,38 +299,48 @@ FRESULT setup_file(FIL* log_file) {
 }
 
 
+static systime_t last_time = 0;
 
 int print_data(char* buffer, size_t len) {
-    float u_total = get_total_voltage();
-    std::array<float, 6> cell_voltages;
-    get_cell_voltages(cell_voltages);
+  sysinterval_t dt = chVTTimeElapsedSinceX(last_time);
+  if(last_time == 0) {
+    dt = 0;
+  } 
+  last_time = chVTGetSystemTimeX();
 
-    float cell_min = cell_voltages[0];
-    float cell_max = cell_voltages[0];
-    for(int i=1; i<6; i++) {
-      if(cell_voltages[i]>0.1) {
-        cell_min = MIN(cell_voltages[i], cell_min);
-        cell_max = MAX(cell_voltages[i], cell_max);
-      }
+  float u_total = get_total_voltage();
+  std::array<float, 6> cell_voltages;
+  get_cell_voltages(cell_voltages);
+
+  float cell_min = cell_voltages[0];
+  float cell_max = cell_voltages[0];
+  for(int i=1; i<6; i++) {
+    if(cell_voltages[i]>0.1) {
+      cell_min = MIN(cell_voltages[i], cell_min);
+      cell_max = MAX(cell_voltages[i], cell_max);
     }
+  }
 
-    float delta_cell = cell_max - cell_min;
+  float delta_cell = cell_max - cell_min;
 
-    //float temp = get_temperature();
-    
-    float c1 = get_current(CS_BTS1);
-    float c2 = get_current(CS_BTS2);
-    float ct = get_current(CS_ACS713);
-    float c_total = c1 + c2;
-    //float power = u_total * c_total;
+  //float temp = get_temperature();
+  
+  float c1 = get_current(CS_BTS1);
+  float c2 = get_current(CS_BTS2);
+  float ct = get_current(CS_ACS713);
+  float c_total = c1 + c2;
+  //float power = u_total * c_total;
 
-    int l = chsnprintf(buffer, len, "%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f\r\n",
-        u_total, delta_cell,
-        cell_voltages[0], cell_voltages[1], cell_voltages[2],
-        cell_voltages[3], cell_voltages[4], cell_voltages[5],
-        c_total, c1, c2, ct
-    );
-    return l;
+  log_energy += chTimeI2MS(dt) * c_total / 3600.0;
+
+  int l = chsnprintf(buffer, len, "%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f,%02f\r\n",
+      log_energy,
+      u_total, delta_cell,
+      cell_voltages[0], cell_voltages[1], cell_voltages[2],
+      cell_voltages[3], cell_voltages[4], cell_voltages[5],
+      c_total, c1, c2, ct
+  );
+  return l;
 }
 
 // if fatfs use stack for working buffers, stack size should be reserved accordingly
@@ -316,9 +360,11 @@ static THD_FUNCTION(ThreadReporting, arg) {
   static const evhandler_t evhndl[] = {
     InsertHandler,
     RemoveHandler,
+    newLogHandler,
+    closeLogHandler,
     //ShellHandler
   };
-  event_listener_t el0, el1;//, el2;
+  event_listener_t el0, el1, el2, el3;//, el2;
 
   /*
    * Initializes the MMC driver to work with SPI1.
@@ -331,6 +377,8 @@ static THD_FUNCTION(ThreadReporting, arg) {
    */
   tmr_init(&MMCD1);
 
+  chEvtObjectInit(&new_log_event);
+  chEvtObjectInit(&close_log_event);
 
 
   /*
@@ -339,12 +387,9 @@ static THD_FUNCTION(ThreadReporting, arg) {
    */
   chEvtRegister(&inserted_event, &el0, 0);
   chEvtRegister(&removed_event, &el1, 1);
+  chEvtRegister(&new_log_event, &el2, 2);
+  chEvtRegister(&close_log_event, &el3, 3);
   //chEvtRegister(&shell_terminated, &el2, 2);
-
-
-
-
-
 
 
   while(true) {
